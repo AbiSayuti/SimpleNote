@@ -36,24 +36,89 @@ class NoteTableViewController: UITableViewController {
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return tasks.count
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cellTable", for: indexPath)
 
         // Configure the cell...
+        
+        //dekalrasi dataTask sebagai index dari tasks
+        let dataTask = tasks[indexPath.row]
+        //mengambil data dengan attributes name_task
+        if let myDataTask = dataTask.name_task {
+            //menampilkan data ke label
+            cell.textLabel?.text = myDataTask
+        }
 
         return cell
     }
-    */
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        //memanggil method getdata()
+        getData()
+        //memanggil reloadData
+        tableView.reloadData()
+        
+        
+    }
+    
 
+    func getData() {
+        
+        //mengecek apakah ada error atau tidak
+        do {
+            //kondisi kalau tidak error
+            //maka aka request download data
+            tasks = try context.fetch(Task.fetchRequest())
+            
+        }
+        catch {
+            //kondisi bila error fetch data
+            print("Fetching failed")
+            
+        }
+        
+    }
+    
+    //menambahkan menu swipe bila edit data
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        
+        //mengecek apakah swipe apabila editing style nya delete
+        
+        if editingStyle == .delete {
+            let task = tasks[indexPath.row]
+            context.delete(task)
+            //delete data
+            (UIApplication.shared.delegate as! AppDelegate).saveContext()
+            
+            do {
+                //retrieve data
+                tasks = try context.fetch(Task.fetchRequest())
+                
+                
+                }
+            catch {
+                print("Fetching Failed")
+            }
+            
+        }
+        //load data lagi
+        tableView.reloadData()
+        
+        
+    }
+    
+    
     /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
